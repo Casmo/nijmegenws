@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>NijmegenJS - Websockets</title>
+</head>
+<body>
+<h1>NijmegenJS - Websockets</h1>
+<div><strong>Status:</strong> <span id="status">Disconnected... <a href="#" onclick="connect();">connect</a></span></div>
+<div id="log"></div>
+<hr />
+<input id="input-message" placeholder="Send message..." />
+
+<script>
+var settings = {
+    host: window.location.hostname,
+    port: 1234
+};
+var socket;
+
+/**
+ * (re)connects to the websocket server
+ */
+function connect() {
+
+    if (isConnected()) {
+        return;
+    }
+
+    socket = new WebSocket("ws://" + settings.host + ":" + settings.port);
+
+    // Receiving a message from the server
+    socket.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        receiveMessage(data);
+    };
+
+    // Connected
+    socket.onopen = function () {
+        document.getElementById('status').innerHTML = 'Connected!';
+    };
+
+    // Disconnected
+    socket.onclose = function (event) {
+        document.getElementById('status').innerHTML = 'Disconnected... <a href="#" onclick="connect();">connect</a>';
+    };
+
+}
+
+/**
+ * Checks if the client is connected to the server
+ *
+ * @return bool
+ */
+function isConnected() {
+    return (socket != null && socket.readyState != null && socket.readyState == 1);
+}
+
+/**
+ * Sends a json encoded string to the websocket server
+ *
+ * @param message
+ */
+function sendMessage(message) {
+
+    if (!isConnected()) {
+        return false;
+    }
+    var jsonData = {
+        topic: 'message',
+        data: {
+            message: message
+        }
+    };
+    socket.send(JSON.stringify(jsonData));
+
+}
+
+/**
+ * Received a message from the websocket server
+ *
+ * @param message
+ */
+function receiveMessage(data) {
+
+    if (data.data != null && data.data.message != null) {
+        document.getElementById('log').innerHTML += data.data.message + '<br />';
+    }
+
+}
+
+document.getElementById('input-message').addEventListener('keydown', function(event) {
+    if (event.keyCode == 13) {
+        sendMessage(this.value);
+        this.value = '';
+    }
+}, false);
+
+</script>
+</body>
+</html>
