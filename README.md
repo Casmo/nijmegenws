@@ -12,3 +12,4 @@ Nijmegen JS websocket workshop.
 # Challenge
 * Send incoming chat messages to all connected clients
 * Send connecting and disconnecting messages to all clients
+* *Bonus*: Let clients change their name!
